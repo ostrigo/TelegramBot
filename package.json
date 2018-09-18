@@ -1,0 +1,29 @@
+{
+  "name": "telegrambot",
+  "version": "1.0.0",
+  "description": "tbot for EOSfSP",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ostrigo/TelegramBot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "eos"
+  ],
+  "author": "Oleg Strigo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ostrigo/TelegramBot/issues"
+  },
+  "homepage": "https://github.com/ostrigo/TelegramBot#readme",
+  "dependencies": {
+    "socks5-https-client": "^1.2.1",
+    "telegraf": "^3.23.1",
+    "telegraf-calendar-telegram": "^1.5.4"
+  }
+}
