@@ -1,2 +1,9 @@
+# node.js
+#
 node_modules/
+npm-debug.log
+
+# Xcode
+#
+package-lock.json
 config.json
