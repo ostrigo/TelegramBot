@@ -1,6 +1,7 @@
 const cfg = require('./config');
 const SocksAgent = require('socks5-https-client/lib/Agent');
 const fse = require('fs-extra');
+const file = cfg.file;
 
 const Calendar = require('telegraf-calendar-telegram');
 const Extra = require('telegraf/extra');
