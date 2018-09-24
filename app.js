@@ -1,7 +1,6 @@
 const cfg = require('./config');
 const SocksAgent = require('socks5-https-client/lib/Agent');
 const fse = require('fs-extra');
-const file = cfg.file;
 
 const Calendar = require('telegraf-calendar-telegram');
 const Extra = require('telegraf/extra');
@@ -57,9 +56,19 @@ bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
 
 bot.hears(/меню/i, ctx => ctx.replyWithHTML('Здравствуйте!\nВас приветствует чат-бот внутренней справочной службы.\nДля оформления отгула, напишите <b>[отгул]</b>.\nДля оформления заявки в службу тех.поддержки, напишите <b>[техподдержка]</b> или <b>[поломка]</b>.'));
 bot.hears(/вопрос/i, ctx => ctx.replyWithHTML('Опишите Ваш вопрос, максимально подробно.'));
-bot.hears(/техподдержка|поломка/i, ctx => ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\nситуация: <i>[описание ситуации]</i>, критичность: <i>[плановая/средняя/высокая]</i>'));
-
-bot.hears(/.*/, ctx => fse.touch(ctx.message));
+bot.hears(/техподдержка|поломка/i, ctx => {
+    ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\nситуация: <i>[описание ситуации]</i>, критичность: <i>[плановая/средняя/высокая]</i>');
+    bot.hears(/.*/, ctx => {
+        fse.writeFile('./files/object.json', JSON.stringify(ctx.message, null, 4), (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            };
+            console.log("File has been created");
+        });
+        ctx.reply('Спасибо, ваша заявка принята!');
+    });
+});
 
 bot.hears(/отгул/i, ctx => ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\n<i>[причина отгула]</i>, с <i>[дата начала в формате ДД.ММ.ГГ]</i> до <i>[дата окончания в формате ДД.ММ.ГГ]</i>.\nПри выборе даты вы можете использовать команду [/calendar]'));
 bot.hears(/о чат-боте/i, ctx => ctx.replyWithHTML('Я - бот-помощник для работы с СЭД на базе EOSfSP.\nПо всем вопросам обращаться:\nsupport@junicsoft.ru'));

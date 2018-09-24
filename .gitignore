@@ -5,8 +5,5 @@ npm-debug.log
 
 # Xcode
 #
-<<<<<<< HEAD
 config.json
-=======
-config.json
->>>>>>> c507bee72ade75103381a01e637051ba147d29e3
+files/
