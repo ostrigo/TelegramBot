@@ -59,7 +59,8 @@ bot.hears(/вопрос/i, ctx => ctx.replyWithHTML('Опишите Ваш во�
 bot.hears(/техподдержка|поломка/i, ctx => {
     ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\nситуация: <i>[описание ситуации]</i>, критичность: <i>[плановая/средняя/высокая]</i>');
     bot.hears(/.*/, ctx => {
-        fse.writeFile('./files/object.json', JSON.stringify(ctx.message, null, 4), (err) => {
+        // fse.writeFile('./files/object.json', JSON.stringify(ctx.message, null, 4), (err) => {
+        fse.writeFile('./files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json', JSON.stringify(ctx.message, null, 4), (err) => {
             if (err) {
                 console.error(err);
                 return;

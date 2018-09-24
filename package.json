@@ -26,5 +26,8 @@
     "socks5-https-client": "^1.2.1",
     "telegraf": "^3.23.1",
     "telegraf-calendar-telegram": "^1.5.4"
+  },
+  "nodemonConfig": {
+    "ignore": ["files/*.json"]
   }
 }
