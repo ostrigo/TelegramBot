@@ -8,25 +8,25 @@ const Markup = require('telegraf/markup');
 const Telegraf = require('telegraf');
 
 const socksAgent = new SocksAgent({
-  socksHost: cfg.proxy.host,
-  socksPort: cfg.proxy.port,
-  socksUsername: cfg.proxy.login,
-  socksPassword: cfg.proxy.psswd,
+    socksHost: cfg.proxy.host,
+    socksPort: cfg.proxy.port,
+    socksUsername: cfg.proxy.login,
+    socksPassword: cfg.proxy.psswd,
 });
 // create the bot
 const bot = new Telegraf(cfg.token, {
-  telegram: { agent: socksAgent }
+    telegram: { agent: socksAgent }
 });
 
 bot.use(Telegraf.log());
 
-const data =  [
-        {title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир'},
-        {title: 'Акт сверки за 1 полугодие 2018', regnum: 'Вх-1318/18', regdate: '07.09.2018', author: 'Журбинский Владимир'},
-        {title: 'О продлении действия льготного периода №231 от 30.08.2018', regnum: 'Вх-1309/18', regdate: '06.09.2018', author: 'Стриго Олег'},
-        {title: 'Счета за август+ протокол согласования цены №4 от 01.08.2018', regnum: 'Вх-1285/18', regdate: '04.09.2018', author: 'Стриго Олег'},
-        {title: 'Сертификаты + сопроводительное письмо №8310 от 16.08.2018', regnum: 'Вх-1211/18', regdate: '29.08.2018', author: 'Юферев Андрей'},
-    ];
+const data = [
+    { title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
+    { title: 'Акт сверки за 1 полугодие 2018', regnum: 'Вх-1318/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
+    { title: 'О продлении действия льготного периода №231 от 30.08.2018', regnum: 'Вх-1309/18', regdate: '06.09.2018', author: 'Стриго Олег' },
+    { title: 'Счета за август+ протокол согласования цены №4 от 01.08.2018', regnum: 'Вх-1285/18', regdate: '04.09.2018', author: 'Стриго Олег' },
+    { title: 'Сертификаты + сопроводительное письмо №8310 от 16.08.2018', regnum: 'Вх-1211/18', regdate: '29.08.2018', author: 'Юферев Андрей' },
+];
 
 // instantiate the calendar
 const calendar = new Calendar(bot, {
@@ -42,16 +42,16 @@ const calendar = new Calendar(bot, {
 calendar.setDateListener((ctx, date) => ctx.reply(date));
 
 bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
-  return reply(`Добро пожаловать, ${first_name} ${last_name}! Ваш ID: @${username}`, Markup
-    .keyboard([
-      ['☰ Меню', '🔍 Поиск'], // Row1 with 2 buttons
-      ['🎮 Отгул', '❓ Вопрос'], // Row2 with 2 buttons
-      ['🆘 Техподдержка', '🤖 О чат-боте'] // Row2 with 2 buttons
-    ])
-    .oneTime()
-    .resize()
-    .extra()
-  )
+    return reply(`Добро пожаловать, ${first_name} ${last_name}! Ваш ID: @${username}`, Markup
+        .keyboard([
+            ['☰ Меню', '🔍 Поиск'], // Row1 with 2 buttons
+            ['🎮 Отгул', '❓ Вопрос'], // Row2 with 2 buttons
+            ['🆘 Техподдержка', '🤖 О чат-боте'] // Row2 with 2 buttons
+        ])
+        .oneTime()
+        .resize()
+        .extra()
+    )
 })
 
 bot.hears(/меню/i, ctx => ctx.replyWithHTML('Здравствуйте!\nВас приветствует чат-бот внутренней справочной службы.\nДля оформления отгула, напишите <b>[отгул]</b>.\nДля оформления заявки в службу тех.поддержки, напишите <b>[техподдержка]</b> или <b>[поломка]</b>.'));
@@ -59,13 +59,12 @@ bot.hears(/вопрос/i, ctx => ctx.replyWithHTML('Опишите Ваш во�
 bot.hears(/техподдержка|поломка/i, ctx => {
     ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\nситуация: <i>[описание ситуации]</i>, критичность: <i>[плановая/средняя/высокая]</i>');
     bot.hears(/.*/, ctx => {
-        // fse.writeFile('./files/object.json', JSON.stringify(ctx.message, null, 4), (err) => {
-        fse.writeFile('./files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json', JSON.stringify(ctx.message, null, 4), (err) => {
+        fse.writeFile('./files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json', JSON.stringify(ctx.update, null, 4), (err) => {
             if (err) {
                 console.error(err);
                 return;
             };
-            console.log("File has been created");
+            console.log("*************** File has been created ***************");
         });
         ctx.reply('Спасибо, ваша заявка принята!');
     });
