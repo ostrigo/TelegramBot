@@ -1,7 +1,8 @@
 const cfg = require('./config');
 const SocksAgent = require('socks5-https-client/lib/Agent');
 const fse = require('fs-extra');
-const download = require('image-downloader');
+const path = require('path');
+const request = require('request');
 
 const Calendar = require('telegraf-calendar-telegram');
 const Extra = require('telegraf/extra');
@@ -19,7 +20,7 @@ const bot = new Telegraf(cfg.token, {
     telegram: { agent: socksAgent }
 });
 
-// bot.use(Telegraf.log());
+bot.use(Telegraf.log());
 
 const data = [
     { title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
@@ -97,20 +98,23 @@ bot.hears(/calendar/ig, ctx => {
 // Handle sticker or photo update
 bot.on(['sticker', 'photo'], (ctx) => {
     const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
-    console.log('file_id: ', photoId);
     bot.telegram.getFileLink(photoId).then(result => {
-        console.log('result: ', result);
-        const options = {
+        const filename = 'tbot_photo_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.jpg';
+        request.get({
             url: result,
-            dest: './files/tbot_photo_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.jpg'
-        };
-        download.image(options)
-            .then(({ filename, image }) => {
-                console.log('File saved to', filename);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+            agentClass: SocksAgent,
+            agentOptions: {
+                socksHost: cfg.proxy.host,
+                socksPort: cfg.proxy.port,
+                socksUsername: cfg.proxy.login,
+                socksPassword: cfg.proxy.psswd
+            }
+        })
+        .on('error', function (err) {
+            console.log(err);
+        })
+        .pipe(fse.createWriteStream(path.join('./files/', filename)));
+
     });
 });
 
@@ -118,5 +122,5 @@ bot.startPolling();
 bot.telegram.getMe().then((bot_informations) => {
     console.log('Bot information:');
     console.log(bot_informations);
-    console.log('Server has initialized bot nickname. Nick: ' + bot_informations.username);
+    console.log('Server has initialized bot nickname. Nick: ' + bot_informations.username + '\r\n');
 });
