@@ -1,6 +1,7 @@
 const cfg = require('./config');
 const SocksAgent = require('socks5-https-client/lib/Agent');
 const fse = require('fs-extra');
+const download = require('image-downloader');
 
 const Calendar = require('telegraf-calendar-telegram');
 const Extra = require('telegraf/extra');
@@ -18,7 +19,7 @@ const bot = new Telegraf(cfg.token, {
     telegram: { agent: socksAgent }
 });
 
-bot.use(Telegraf.log());
+// bot.use(Telegraf.log());
 
 const data = [
     { title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
@@ -64,7 +65,7 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                 console.error(err);
                 return;
             };
-            console.log("*************** File has been created ***************");
+            console.log("*************** JSON file has been created ***************");
         });
         ctx.reply('Спасибо, ваша заявка принята!');
     });
@@ -93,7 +94,25 @@ bot.hears(/calendar/ig, ctx => {
     ctx.reply('Выберите дату...', calendar.setMinDate(minDate).setMaxDate(maxDate).getCalendar())
 });
 
-
+// Handle sticker or photo update
+bot.on(['sticker', 'photo'], (ctx) => {
+    const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
+    console.log('file_id: ', photoId);
+    bot.telegram.getFileLink(photoId).then(result => {
+        console.log('result: ', result);
+        const options = {
+            url: result,
+            dest: './files/tbot_photo_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.jpg'
+        };
+        download.image(options)
+            .then(({ filename, image }) => {
+                console.log('File saved to', filename);
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    });
+});
 
 bot.startPolling();
 bot.telegram.getMe().then((bot_informations) => {

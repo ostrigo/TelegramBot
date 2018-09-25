@@ -22,12 +22,17 @@
   },
   "homepage": "https://github.com/ostrigo/TelegramBot#readme",
   "dependencies": {
-    "fs-extra": "^7.0.0",
+    "image-downloader": "^3.4.1",
     "socks5-https-client": "^1.2.1",
     "telegraf": "^3.23.1",
     "telegraf-calendar-telegram": "^1.5.4"
   },
   "nodemonConfig": {
-    "ignore": ["files/*.json"]
+    "ignore": [
+      "files/*.json"
+    ]
+  },
+  "devDependencies": {
+    "fs-extra": "^7.0.0"
   }
 }
