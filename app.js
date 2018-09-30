@@ -60,13 +60,13 @@ bot.hears(/меню/i, ctx => ctx.replyWithHTML('Здравствуйте!\nВа
 bot.hears(/вопрос/i, ctx => ctx.replyWithHTML('Опишите Ваш вопрос, максимально подробно.'));
 bot.hears(/техподдержка|поломка/i, ctx => {
     ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\nситуация: <i>[описание ситуации]</i>, критичность: <i>[плановая/средняя/высокая]</i>');
-    bot.hears(/.*/, ctx => {
+    bot.on('text', ctx => {
         fse.writeFile('./files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json', JSON.stringify(ctx.update, null, 4), (err) => {
             if (err) {
                 console.error(err);
                 return;
             };
-            console.log("*************** JSON file has been created ***************");
+            console.log('*************** JSON file has been created ***************');
         });
         ctx.reply('Спасибо, ваша заявка принята!');
     });
@@ -99,7 +99,7 @@ bot.hears(/calendar/ig, ctx => {
 bot.on(['sticker', 'photo'], (ctx) => {
     const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
     bot.telegram.getFileLink(photoId).then(result => {
-        const filename = 'tbot_photo_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.jpg';
+        const filename = 'tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.jpg';
         request.get({
             url: result,
             agentClass: SocksAgent,
