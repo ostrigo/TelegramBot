@@ -43,12 +43,20 @@ const calendar = new Calendar(bot, {
 // listen for the selected date event
 calendar.setDateListener((ctx, date) => ctx.reply(date));
 
+// bot.command('start', (ctx) =>  ctx.replyWithMarkdown("*Hello*")
+//   .then(() => { return ctx.replyWithMarkdown('_This_') })
+//   .then(() => { return ctx.replyWithMarkdown('```Should```') })
+//   .then(() => { return ctx.replyWithMarkdown('Send') })
+//   .then(() => { return ctx.replyWithMarkdown('Sequentially') })
+//   .then(() => { return ctx.replyWithMarkdown('really') })
+// )
+
 bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
     return reply(`Добро пожаловать, ${first_name} ${last_name}! Ваш ID: @${username}`, Markup
         .keyboard([
             ['☰ Меню', '🔍 Поиск'], // Row1 with 2 buttons
             ['🎮 Отгул', '❓ Вопрос'], // Row2 with 2 buttons
-            ['🆘 Техподдержка', '🤖 О чат-боте'] // Row2 with 2 buttons
+            ['🆘 Техподдержка', '🤖 О чат-боте'] // Row3 with 2 buttons
         ])
         .oneTime()
         .resize()
@@ -56,31 +64,42 @@ bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
     )
 })
 
-bot.hears(/меню/i, ctx => ctx.replyWithHTML('Здравствуйте!\nВас приветствует чат-бот внутренней справочной службы.\nДля оформления отгула, напишите <b>[отгул]</b>.\nДля оформления заявки в службу тех.поддержки, напишите <b>[техподдержка]</b> или <b>[поломка]</b>.'));
-bot.hears(/вопрос/i, ctx => ctx.replyWithHTML('Опишите Ваш вопрос, максимально подробно.'));
+bot.hears(/меню/i, ctx => ctx.replyWithMarkdown('Здравствуйте!\nВас приветствует чат-бот внутренней справочной службы.\nДля оформления отгула, напишите *[отгул]*.\nДля оформления заявки в службу тех.поддержки, напишите *[техподдержка]* или *[поломка]*.'));
+bot.hears(/вопрос/i, ctx => ctx.replyWithMarkdown('Опишите Ваш вопрос, максимально подробно.'));
 bot.hears(/техподдержка|поломка/i, ctx => {
-    ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\nситуация: <i>[описание ситуации]</i>, критичность: <i>[плановая/средняя/высокая]</i>');
+    ctx.replyWithMarkdown('Сейчас опишите ситуацию в формате:\nситуация: _[описание ситуации]_, критичность: _[плановая/средняя/высокая]_');
+    
+    // ctx.reply(Markup.inlineKeyboard([Markup.callbackButton('➡️ Next', ctx.message.text)]).extra());
+
+    ctx.reply(
+        Markup.inlineKeyboard([
+          Markup.callbackButton('➡️ Next', ctx.message.text),
+        ]).extra(),
+      );
+
     bot.on('text', ctx => {
         fse.writeFile('./files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json', JSON.stringify(ctx.update, null, 4), (err) => {
             if (err) {
                 console.error(err);
+                ctx.reply('Ошибка синхронизации с СЭД! Попробуйте еще раз.');
                 return;
             };
             console.log('*************** JSON file has been created ***************');
+            ctx.reply('Спасибо, ваша заявка принята!');
         });
-        ctx.reply('Спасибо, ваша заявка принята!');
+
     });
 });
 
-bot.hears(/отгул/i, ctx => ctx.replyWithHTML('Пожалуйста опишите ситуацию в формате:\n<i>[причина отгула]</i>, с <i>[дата начала в формате ДД.ММ.ГГ]</i> до <i>[дата окончания в формате ДД.ММ.ГГ]</i>.\nПри выборе даты вы можете использовать команду [/calendar]'));
-bot.hears(/о чат-боте/i, ctx => ctx.replyWithHTML('Я - бот-помощник для работы с СЭД на базе EOSfSP.\nПо всем вопросам обращаться:\nsupport@junicsoft.ru'));
+bot.hears(/отгул/i, ctx => ctx.replyWithMarkdown('Пожалуйста опишите ситуацию в формате:\n_[причина отгула]_, с _[дата начала в формате ДД.ММ.ГГ]_ до _[дата окончания в формате ДД.ММ.ГГ]_.\nПри выборе даты вы можете использовать команду [/calendar]'));
+bot.hears(/о чат-боте/i, ctx => ctx.replyWithMarkdown('Я - бот-помощник для работы с СЭД на базе EOSfSP.\nПо всем вопросам обращаться:\nsupport@junicsoft.ru'));
 bot.hears(/поиск/i, ctx => {
-    ctx.replyWithHTML('Активные документы:');
-    setTimeout(() => {
-        data.forEach((item) => {
-            ctx.replyWithHTML(`<a href="http://junicsoft.ru">${item.regnum}</a> от ${item.regdate}`);
+    ctx.replyWithMarkdown('*Активные документы:*')
+        .then(() => {
+            data.forEach((item) => {
+                ctx.replyWithMarkdown(`[${item.regnum}](http://junicsoft.ru) от ${item.regdate}`);
+            })
         });
-    }, 800);
 });
 
 // retreive the calendar HTML
@@ -110,10 +129,10 @@ bot.on(['sticker', 'photo'], (ctx) => {
                 socksPassword: cfg.proxy.psswd
             }
         })
-        .on('error', function (err) {
-            console.log(err);
-        })
-        .pipe(fse.createWriteStream(path.join('./files/', filename)));
+            .on('error', function (err) {
+                console.log(err);
+            })
+            .pipe(fse.createWriteStream(path.join('./files/', filename)));
 
     });
 });
