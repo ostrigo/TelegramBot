@@ -29,7 +29,7 @@ const data = [
     { title: 'Счета за август+ протокол согласования цены №4 от 01.08.2018', regnum: 'Вх-1285/18', regdate: '04.09.2018', author: 'Стриго Олег' },
     { title: 'Сертификаты + сопроводительное письмо №8310 от 16.08.2018', regnum: 'Вх-1211/18', regdate: '29.08.2018', author: 'Юферев Андрей' },
 ];
-
+G
 // instantiate the calendar
 const calendar = new Calendar(bot, {
     startWeekDay: 1,
