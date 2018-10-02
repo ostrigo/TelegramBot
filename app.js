@@ -97,7 +97,7 @@ bot.hears(/поиск/i, ctx => {
     ctx.replyWithMarkdown('*Активные документы:*')
         .then(() => {
             data.forEach((item) => {
-                ctx.replyWithMarkdown(`[${item.regnum}](http://junicsoft.ru) от ${item.regdate}`);
+                ctx.replyWithMarkdown(`[${item.regnum}](https://junicsoft.ru) от ${item.regdate}`);
             })
         });
 });
