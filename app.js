@@ -43,14 +43,6 @@ const calendar = new Calendar(bot, {
 // listen for the selected date event
 calendar.setDateListener((ctx, date) => ctx.reply(date));
 
-// bot.command('start', (ctx) =>  ctx.replyWithMarkdown("*Hello*")
-//   .then(() => { return ctx.replyWithMarkdown('_This_') })
-//   .then(() => { return ctx.replyWithMarkdown('```Should```') })
-//   .then(() => { return ctx.replyWithMarkdown('Send') })
-//   .then(() => { return ctx.replyWithMarkdown('Sequentially') })
-//   .then(() => { return ctx.replyWithMarkdown('really') })
-// )
-
 bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
     return reply(`Добро пожаловать, ${first_name} ${last_name}! Ваш ID: @${username}`, Markup
         .keyboard([
@@ -70,6 +62,14 @@ bot.hears(/техподдержка|поломка/i, ctx => {
     ctx.replyWithMarkdown('Сейчас опишите ситуацию в формате:\nситуация: _[описание ситуации]_, критичность: _[плановая/средняя/высокая]_');
     
     // ctx.reply(Markup.inlineKeyboard([Markup.callbackButton('➡️ Next', ctx.message.text)]).extra());
+
+    // bot.command('start', (ctx) =>  ctx.replyWithMarkdown("*Hello*")
+    //   .then(() => { return ctx.replyWithMarkdown('_This_') })
+    //   .then(() => { return ctx.replyWithMarkdown('```Should```') })
+    //   .then(() => { return ctx.replyWithMarkdown('Send') })
+    //   .then(() => { return ctx.replyWithMarkdown('Sequentially') })
+    //   .then(() => { return ctx.replyWithMarkdown('really') })
+    // )
 
     ctx.reply(
         Markup.inlineKeyboard([
