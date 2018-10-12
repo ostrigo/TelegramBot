@@ -1,5 +1,4 @@
 const cfg = require('./config');
-let ctxMsg;
 const SocksAgent = require('socks5-https-client/lib/Agent');
 const fse = require('fs-extra');
 const path = require('path');
@@ -21,7 +20,10 @@ const bot = new Telegraf(cfg.token, {
     telegram: { agent: socksAgent }
 });
 
-bot.use(Telegraf.log());
+// set vars
+let savedFile = '';
+
+// bot.use(Telegraf.log());
 
 const data = [
     { title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
@@ -60,25 +62,19 @@ bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
 bot.hears(/меню/i, ctx => ctx.replyWithMarkdown('Здравствуйте!\nВас приветствует чат-бот внутренней справочной службы.\nДля оформления отгула, напишите *[отгул]*.\nДля оформления заявки в службу тех.поддержки, напишите *[техподдержка]* или *[поломка]*.'));
 bot.hears(/вопрос/i, ctx => ctx.replyWithMarkdown('Опишите Ваш вопрос, максимально подробно.'));
 bot.hears(/техподдержка|поломка/i, ctx => {
-    ctx.replyWithMarkdown('Сейчас опишите ситуацию в формате:\nситуация: _[описание ситуации]_, критичность: _[плановая/средняя/высокая]_')
+    ctx.replyWithMarkdown('*Сейчас по шагам опишите ситуацию.*')
         .then(() => {
-            ctx.reply('ТП. Шаг 1 - описание.', Markup.inlineKeyboard([
-                Markup.callbackButton('🛑 Стоп', 'stop')
-            ]).extra());
-            bot.action('stop', ctx => {
-                ctx.reply('Выходим из режима тех. поддержки!');
-                ctx.editMessageReplyMarkup(Markup.inlineKeyboard([]).extra());
-                return;
-            });
+            ctx.replyWithMarkdown('*ТП. Шаг 1 - описание.*');
             bot.on('text', ctx => {
-                fse.writeFile('./files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json', JSON.stringify(ctx.update, null, 4), (err) => {
+                savedFile = './files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json';
+                fse.writeFile(savedFile, JSON.stringify(ctx.update, null, 4), (err) => {
                     if (err) {
                         console.error(err);
                         ctx.reply('Ошибка синхронизации с СЭД! Попробуйте еще раз.');
                         return;
                     };
                     console.log('*************** JSON file has been created ***************');
-                    ctx.reply('Спасибо, текст заявки сохранен!\nТП. Шаг 2 - критичность.', Markup.inlineKeyboard([
+                    ctx.replyWithMarkdown('*Спасибо, текст заявки сохранен!\nТП. Шаг 2 - критичность.*', Markup.inlineKeyboard([
                         Markup.callbackButton('Плановая', 'crit1'),
                         Markup.callbackButton('Средняя', 'crit2'),
                         Markup.callbackButton('Высокая', 'crit3')
@@ -86,13 +82,18 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                 });
             });
             bot.action('crit1', ctx => {
-                return ctx.replyWithMarkdown('Выбрана критичность: *Плановая*.\nТП. Шаг 3 - фото.');
+                fse.readFile(savedFile, (err, data) => {
+                    if (err) throw err;
+                    let jData = JSON.parse(data);
+                    console.log(jData);
+                });
+                return ctx.replyWithMarkdown('*Выбрана критичность: _Плановая_.\nТП. Шаг 3 - фото.*');
             });
             bot.action('crit2', ctx => {
-                return ctx.replyWithMarkdown('Выбрана критичность: *Средняя*.\nТП. Шаг 3 - фото.');
+                return ctx.replyWithMarkdown('*Выбрана критичность: _Средняя_.\nТП. Шаг 3 - фото.*');
             });
             bot.action('crit3', ctx => {
-                return ctx.replyWithMarkdown('Выбрана критичность: *Высокая*.\nТП. Шаг 3 - фото.');
+                return ctx.replyWithMarkdown('*Выбрана критичность: _Высокая_.\nТП. Шаг 3 - фото.*');
             });
             // Handle sticker or photo update
             bot.on(['sticker', 'photo'], (ctx) => {
@@ -113,10 +114,9 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                             console.log(err);
                         })
                         .pipe(fse.createWriteStream(path.join('./files/', filename)));
-                        ctx.reply('Спасибо, заявка отправлена в СЭД для модерации!');
+                    ctx.replyWithMarkdown('*Спасибо, заявка отправлена в СЭД для модерации!*');
                 });
             });
-
         })
 });
 
