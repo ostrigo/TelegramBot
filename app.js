@@ -21,7 +21,11 @@ const bot = new Telegraf(cfg.token, {
 });
 
 // set vars
-let savedFile = '';
+let savedFile;
+let jData;
+let filePath;
+let chatId;
+let msgId;
 
 // bot.use(Telegraf.log());
 
@@ -66,6 +70,8 @@ bot.hears(/техподдержка|поломка/i, ctx => {
         .then(() => {
             ctx.replyWithMarkdown('*ТП. Шаг 1 - описание.*');
             bot.on('text', ctx => {
+                chatId = ctx.message.chat.id;
+                msgId = ctx.message.message_id;
                 savedFile = './files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json';
                 fse.writeFile(savedFile, JSON.stringify(ctx.update, null, 4), (err) => {
                     if (err) {
@@ -84,22 +90,28 @@ bot.hears(/техподдержка|поломка/i, ctx => {
             bot.action('crit1', ctx => {
                 fse.readFile(savedFile, (err, data) => {
                     if (err) throw err;
-                    let jData = JSON.parse(data);
+                    jData = JSON.parse(data);
+                    jData['support_crit'] = 'Плановая';
                     console.log(jData);
+                    fse.writeFile(savedFile, JSON.stringify(jData, null, 4), 'utf-8', function(err) {
+                        if (err) throw err;
+                        console.log('Critical level saved!');
+                    })
                 });
-                return ctx.replyWithMarkdown('*Выбрана критичность: _Плановая_.\nТП. Шаг 3 - фото.*');
+                
+                return ctx.replyWithMarkdown('*Выбрана критичность: [Плановая].\nТП. Шаг 3 - фото.*');
             });
             bot.action('crit2', ctx => {
-                return ctx.replyWithMarkdown('*Выбрана критичность: _Средняя_.\nТП. Шаг 3 - фото.*');
+                return ctx.replyWithMarkdown('*Выбрана критичность: [Средняя].\nТП. Шаг 3 - фото.*');
             });
             bot.action('crit3', ctx => {
-                return ctx.replyWithMarkdown('*Выбрана критичность: _Высокая_.\nТП. Шаг 3 - фото.*');
+                return ctx.replyWithMarkdown('*Выбрана критичность: [Высокая].\nТП. Шаг 3 - фото.*');
             });
             // Handle sticker or photo update
             bot.on(['sticker', 'photo'], (ctx) => {
                 const photoId = ctx.message.photo[ctx.message.photo.length - 1].file_id;
                 bot.telegram.getFileLink(photoId).then(result => {
-                    const filename = 'tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.jpg';
+                    const filename = 'tbot_' + chatId + '-' + msgId + '.jpg';
                     request.get({
                         url: result,
                         agentClass: SocksAgent,
