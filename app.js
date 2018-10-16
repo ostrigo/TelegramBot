@@ -87,25 +87,28 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                     ]).extra())
                 });
             });
-            bot.action('crit1', ctx => {
+
+            function setCrit(lvl) {
                 fse.readFile(savedFile, (err, data) => {
                     if (err) throw err;
                     jData = JSON.parse(data);
-                    jData['support_crit'] = 'Плановая';
+                    jData['support_crit'] = lvl;
                     console.log(jData);
                     fse.writeFile(savedFile, JSON.stringify(jData, null, 4), 'utf-8', function(err) {
                         if (err) throw err;
                         console.log('Critical level saved!');
                     })
                 });
-                
-                return ctx.replyWithMarkdown('*Выбрана критичность: [Плановая].\nТП. Шаг 3 - фото.*');
+                return ctx.replyWithMarkdown(`*Выбрана критичность: [${lvl}].\nТП. Шаг 3 - фото.*`);
+            }
+            bot.action('crit1', ctx => {
+                setCrit('Плановая');
             });
             bot.action('crit2', ctx => {
-                return ctx.replyWithMarkdown('*Выбрана критичность: [Средняя].\nТП. Шаг 3 - фото.*');
+                setCrit('Средняя');
             });
             bot.action('crit3', ctx => {
-                return ctx.replyWithMarkdown('*Выбрана критичность: [Высокая].\nТП. Шаг 3 - фото.*');
+                setCrit('Высокая');
             });
             // Handle sticker or photo update
             bot.on(['sticker', 'photo'], (ctx) => {

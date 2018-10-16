@@ -7,3 +7,7 @@ npm-debug.log
 #
 config.json
 files/
+
+# VS code
+#
+.vscode/
