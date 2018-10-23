@@ -21,13 +21,13 @@ const bot = new Telegraf(cfg.token, {
 });
 
 // set vars
-let savedFile;
-let jData;
-let filePath;
+let filesPath = cfg.filespath.dev;
+let file;
 let chatId;
 let msgId;
+let json = {};
 
-// bot.use(Telegraf.log());
+bot.use(Telegraf.log());
 
 const data = [
     { title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
@@ -72,42 +72,26 @@ bot.hears(/техподдержка|поломка/i, ctx => {
             bot.on('text', ctx => {
                 chatId = ctx.message.chat.id;
                 msgId = ctx.message.message_id;
-                savedFile = './files/tbot_' + ctx.message.chat.id + '-' + ctx.message.message_id + '.json';
-                fse.writeFile(savedFile, JSON.stringify(ctx.update, null, 4), (err) => {
-                    if (err) {
-                        console.error(err);
-                        ctx.reply('Ошибка синхронизации с СЭД! Попробуйте еще раз.');
-                        return;
-                    };
-                    console.log('*************** JSON file has been created ***************');
-                    ctx.replyWithMarkdown('*Спасибо, текст заявки сохранен!\nТП. Шаг 2 - критичность.*', Markup.inlineKeyboard([
-                        Markup.callbackButton('Плановая', 'crit1'),
-                        Markup.callbackButton('Средняя', 'crit2'),
-                        Markup.callbackButton('Высокая', 'crit3')
-                    ]).extra())
-                });
+                file = filesPath + 'tbot_' + chatId + '-' + msgId + '.json';
+                json = ctx.update;
+                ctx.replyWithMarkdown('*Спасибо, текст заявки сохранен!\nТП. Шаг 2 - критичность.*', Markup.inlineKeyboard([
+                    Markup.callbackButton('Плановая', 'crit1'),
+                    Markup.callbackButton('Средняя', 'crit2'),
+                    Markup.callbackButton('Высокая', 'crit3')
+                ]).extra())
             });
 
             function setCrit(lvl) {
-                fse.readFile(savedFile, (err, data) => {
-                    if (err) throw err;
-                    jData = JSON.parse(data);
-                    jData['support_crit'] = lvl;
-                    console.log(jData);
-                    fse.writeFile(savedFile, JSON.stringify(jData, null, 4), 'utf-8', function(err) {
-                        if (err) throw err;
-                        console.log('Critical level saved!');
-                    })
-                });
+                json['support_crit'] = lvl;
                 return ctx.replyWithMarkdown(`*Выбрана критичность: [${lvl}].\nТП. Шаг 3 - фото.*`);
             }
-            bot.action('crit1', ctx => {
+            bot.action('crit1', () => {
                 setCrit('Плановая');
             });
-            bot.action('crit2', ctx => {
+            bot.action('crit2', () => {
                 setCrit('Средняя');
             });
-            bot.action('crit3', ctx => {
+            bot.action('crit3', () => {
                 setCrit('Высокая');
             });
             // Handle sticker or photo update
@@ -128,7 +112,15 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                         .on('error', function (err) {
                             console.log(err);
                         })
-                        .pipe(fse.createWriteStream(path.join('./files/', filename)));
+                        .pipe(fse.createWriteStream(path.join(filesPath, filename)));
+                    fse.writeFile(file, JSON.stringify(json, null, 4), 'utf-8', function (err) {
+                        if (err) {
+                            console.error(err);
+                            ctx.reply('Ошибка синхронизации с СЭД! Попробуйте еще раз.');
+                            return;
+                        };
+                        console.log('*************** Files has been created ***************');
+                    })
                     ctx.replyWithMarkdown('*Спасибо, заявка отправлена в СЭД для модерации!*');
                 });
             });
@@ -157,8 +149,6 @@ bot.hears(/calendar/ig, ctx => {
 
     ctx.reply('Выберите дату...', calendar.setMinDate(minDate).setMaxDate(maxDate).getCalendar())
 });
-
-
 
 bot.startPolling();
 bot.telegram.getMe().then((bot_informations) => {
