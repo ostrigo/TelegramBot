@@ -27,7 +27,11 @@ let chatId;
 let msgId;
 let json = {};
 
-bot.use(Telegraf.log());
+// bot.use(Telegraf.log());
+
+bot.catch((err) => {
+    console.log('Ooops: ', err)
+})
 
 const data = [
     { title: 'Соглашение о конфиденциальности б/н', regnum: 'Вх-1321/18', regdate: '07.09.2018', author: 'Журбинский Владимир' },
@@ -79,12 +83,12 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                     Markup.callbackButton('Средняя', 'crit2'),
                     Markup.callbackButton('Высокая', 'crit3')
                 ])
-                .extra())
+                    .extra())
             });
 
             function setCrit(ctx, lvl) {
                 json['support_crit'] = lvl;
-                return ctx.replyWithMarkdown(`*Выбрана критичность: [${lvl}].\nТП. Шаг 3 - фото.*`, Markup.inlineKeyboard([]));
+                return ctx.replyWithMarkdown(`*Выбрана критичность: [${lvl}].\nТП. Шаг 3 - фото.*`);
             }
             bot.action('crit1', ctx => {
                 setCrit(ctx, 'Плановая');
