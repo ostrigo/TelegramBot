@@ -57,7 +57,7 @@ bot.command('start', ({ from: { username, first_name, last_name }, reply }) => {
             ['🎮 Отгул', '❓ Вопрос'], // Row2 with 2 buttons
             ['🆘 Техподдержка', '🤖 О чат-боте'] // Row3 with 2 buttons
         ])
-        .oneTime()
+        // .oneTime()
         .resize()
         .extra()
     )
@@ -78,21 +78,22 @@ bot.hears(/техподдержка|поломка/i, ctx => {
                     Markup.callbackButton('Плановая', 'crit1'),
                     Markup.callbackButton('Средняя', 'crit2'),
                     Markup.callbackButton('Высокая', 'crit3')
-                ]).extra())
+                ])
+                .extra())
             });
 
-            function setCrit(lvl) {
+            function setCrit(ctx, lvl) {
                 json['support_crit'] = lvl;
-                return ctx.replyWithMarkdown(`*Выбрана критичность: [${lvl}].\nТП. Шаг 3 - фото.*`);
+                return ctx.replyWithMarkdown(`*Выбрана критичность: [${lvl}].\nТП. Шаг 3 - фото.*`, Markup.inlineKeyboard([]));
             }
-            bot.action('crit1', () => {
-                setCrit('Плановая');
+            bot.action('crit1', ctx => {
+                setCrit(ctx, 'Плановая');
             });
-            bot.action('crit2', () => {
-                setCrit('Средняя');
+            bot.action('crit2', ctx => {
+                setCrit(ctx, 'Средняя');
             });
-            bot.action('crit3', () => {
-                setCrit('Высокая');
+            bot.action('crit3', ctx => {
+                setCrit(ctx, 'Высокая');
             });
             // Handle sticker or photo update
             bot.on(['sticker', 'photo'], (ctx) => {
